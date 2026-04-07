@@ -6,7 +6,7 @@ from nltk.stem.porter import PorterStemmer
 import nltk
 nltk.download('punkt')
 nltk.download('stopwords')
-nltk.download('punkt_tab')
+# nltk.download('punkt_tab')
 try:
     nltk.data.find('tokenizers/punkt')
 except:
