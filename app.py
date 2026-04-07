@@ -1,26 +1,13 @@
 import streamlit as st
 import pickle
 import string
-from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 from nltk.stem.porter import PorterStemmer
-import nltk
-nltk.download('punkt')
-nltk.download('stopwords')
-# nltk.download('punkt_tab')
-try:
-    nltk.data.find('tokenizers/punkt')
-except:
-    nltk.download('punkt')
-
-try:
-    nltk.data.find('corpora/stopwords')
-except:
-    nltk.download('stopwords')
 
 # Load models
 ps = PorterStemmer()
-tfidf = pickle.load(open('./vectorizer.pkl','rb'))
-model = pickle.load(open('./model.pkl','rb'))
+tfidf = pickle.load(open('vectorizer.pkl', 'rb'))
+model = pickle.load(open('model.pkl', 'rb'))
 
 # Page config
 st.set_page_config(page_title="Spam Classifier", page_icon="📩", layout="centered")
@@ -71,30 +58,23 @@ st.markdown('<div class="subtitle">Detect whether a message is Spam or Not</div>
 # Input box
 sms = st.text_area("Enter your message below:", placeholder="Type or paste your SMS/email here...")
 
-# Preprocess function
+# Preprocess function (NO NLTK TOKENIZER)
 def text_transform(text):
     text = text.lower()
-    text = nltk.word_tokenize(text)
 
-    y = []
-    for i in text:
-        if i.isalnum():
-            y.append(i)
+    # Simple tokenization (safe for deployment)
+    words = text.split()
 
-    text = y[:]
-    y.clear()
+    # Remove non-alphanumeric
+    words = [word for word in words if word.isalnum()]
 
-    for i in text:
-        if i not in stopwords.words('english') and i not in string.punctuation:
-            y.append(i)
+    # Remove stopwords + punctuation
+    words = [word for word in words if word not in ENGLISH_STOP_WORDS and word not in string.punctuation]
 
-    text = y[:]
-    y.clear()
+    # Stemming
+    words = [ps.stem(word) for word in words]
 
-    for i in text:
-        y.append(ps.stem(i))
-
-    return " ".join(y)
+    return " ".join(words)
 
 # Predict button
 if st.button("🔍 Analyze Message"):
